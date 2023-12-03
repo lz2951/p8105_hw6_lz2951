@@ -58,15 +58,24 @@ The distribution of ${\hat{r}}^2$:
 
 ```{r}
 boostrap_results |>
-  ggplot(aes(x = r.squared)) + geom_density()
+  ggplot(aes(x = r.squared)) + 
+  geom_density() +
+  ggtitle("Density Plot Showing the Distribution of Estimated Squared r among Boostrap")
 ```
+
+According to the density plot, the distribution of squared r is essentially a symmetric bell-shaped curve. The range of squared r falls between 0.87 and 0.95, with a peak around 0.92. This indicates that the predictive performance of the simple linear regression model for predicting tmax using tmin and prcp as predictors is satisfactory. The distribution of squared r is not apparently skewed, suggesting that squared r is not significantly influenced by individual outlier values.
 
 The distribution of $log(\hat{\beta}_1*\hat{\beta}_2)$
 
 ```{r}
 boostrap_results |>
-  ggplot(aes(x = logbeta)) + geom_density()
+  ggplot(aes(x = logbeta)) + 
+  geom_density() +
+  ggtitle("Density Plot Showing the Distribution of Estimated log(beta0*beta1) among Boostrap") +
+  xlab("log(beta0*beta1)")
 ```
+
+According to the density plot, the distribution of $log(\hat{\beta}_1*\hat{\beta}_2)$ is a left-skewed curve. The peak of $log(\hat{\beta}_1*\hat{\beta}_2)$ falls around -5.5. This obviously left-skewed distribution of $log(\hat{\beta}_1*\hat{\beta}_2)$ suggests that $log(\hat{\beta}_1*\hat{\beta}_2)$ is significantly influenced by individual extremely small values.
 
 The 95% confidence interval for ${\hat{r}}^2$ is (`r quantile(boostrap_results$r.squared, 0.025)`, `r quantile(boostrap_results$r.squared, 0.975)`)
 
@@ -91,7 +100,7 @@ birthwt_df =
 
 ## My own model
 
-I choose mheight, mrace and ppbmi as predictors.
+Intuitively, it's reasonable that the mother's physique and race are related to birth weight of the baby. So I choose mheight, mrace and ppbmi as predictors. This model is baesd on a hypothesized structure for the factors that underly birthweight.
 
 ```{r}
 my_model = lm(bwt ~ mheight + mrace + ppbmi, data = birthwt_df)
@@ -102,13 +111,17 @@ my_model |>
   knitr::kable(digits = 5)
 ```
 
+The most p.value of terms in this model are significant, suggesting my model is reasonable.
+
 Add residuals and fitted values, make plot.
 
 ```{r}
 birthwt_df |>
   modelr::add_residuals(my_model) |>
   modelr::add_predictions(my_model) |>
-  ggplot(aes(x = pred, y = resid)) + geom_point()
+  ggplot(aes(x = pred, y = resid)) + 
+  geom_point() +
+  ggtitle("Point Plot for Model Residuals against Fitted Values")
 ```
 
 ## Compare three models
@@ -145,7 +158,9 @@ cv_df |>
     values_to = "rmse",
     names_prefix = "rmse_") |> 
   mutate(model = fct_inorder(model)) |> 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  ggtitle("Comparison of RMSE among Three Different Models")
 ```
 
-
+According to the violin plot, the cross-validated rmse of main effects model and interaction model are obviously smaller than my own model. Between these two models, interaction model's performance is even better, with lower rmse and more concentrated rmse distribution. So the interaction model is the optimal among all three models.
